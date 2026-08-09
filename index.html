@@ -23,7 +23,7 @@
 
     header {
       display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--border);
+      margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--border);
     }
     .title-group h1 { font-size: 24px; font-weight: 700; }
     .title-group p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
@@ -108,14 +108,40 @@
       width: 65px; padding: 6px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-weight: bold;
     }
 
+    /* MODERN MODAL DESIGN (UI/UX BEST PRACTICE) */
     .modal {
       display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 16px;
+      background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
+      justify-content: center; align-items: center; padding: 16px;
     }
     .modal-content {
-      background-color: white; padding: 24px; border-radius: 12px; width: 440px; max-width: 95%;
-      max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      background-color: white; padding: 24px; border-radius: 16px; width: 420px; max-width: 95%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      animation: modalFadeIn 0.2s ease-out;
     }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    .close-btn {
+      background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;
+    }
+
+    /* STAFFING BAR DESIGN */
+    .staffing-summary-bar {
+      display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .staff-card {
+      flex: 1; min-width: 200px; background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .staff-card-info .title { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .staff-card-info .num { font-size: 20px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+    .staff-card-icon { font-size: 22px; }
   </style>
 </head>
 <body>
@@ -128,7 +154,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
         <div id="system-status" style="background: #dcfce7; color: #15803d; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">System Ready</div>
-        <button onclick="handleLogout()" class="btn-danger" style="padding: 8px 14px; font-size: 13px;">تسجيل الخروج 🚪</button>
+        <button onclick="handleLogout()" class="btn-danger" style="padding: 8px 14px; font-size: 13px;"> Log Out 🚪</button>
       </div>
     </header>
 
@@ -142,21 +168,48 @@
 
     <!-- TAB 1: PRODUCTION LINES CONTROL -->
     <div id="tab-production" class="tab-content active">
+
+      <!-- TOP STAFFING METRICS BAR -->
+      <div class="staffing-summary-bar">
+        <div class="staff-card" style="border-left: 4px solid var(--primary);">
+          <div class="staff-card-info">
+            <div class="title">Company Fixed Workers</div>
+            <div class="num" id="top-company-workers">-</div>
+          </div>
+          <div class="staff-card-icon">🏢</div>
+        </div>
+
+        <div class="staff-card" style="border-left: 4px solid var(--warning);">
+          <div class="staff-card-info">
+            <div class="title">Current Agency Workers</div>
+            <div class="num" id="top-agency-workers">-</div>
+          </div>
+          <div class="staff-card-icon">👥</div>
+        </div>
+
+        <div class="staff-card" style="border-left: 4px solid var(--success);">
+          <div class="staff-card-info">
+            <div class="title">Agency Daily Rate</div>
+            <div class="num" id="top-agency-rate">-</div>
+          </div>
+          <div class="staff-card-icon">💵</div>
+        </div>
+      </div>
       
-      <!-- MACHINES TABLE -->
+      <!-- MACHINES TABLE CARD -->
       <div class="section-card">
         <div class="section-header">
           <div>
             <div class="section-title">Factory Machine Lines</div>
             <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Full control: Edit line details, operating days, mode toggle, or remove line</p>
           </div>
-          <!-- TOP ACTION BUTTONS -->
+          
           <div style="display: flex; gap: 10px; align-items: center;">
             <button type="button" class="btn-outline-primary" onclick="openAddModal()">
-              <span>+</span> Add New Production Line
+              <span>+</span> Add New Line
             </button>
             <button type="button" class="btn-outline-primary" onclick="openBaselineModal()">
-              <span>👥</span> Baseline Labor Staffing
+              <span>⚙️</span> Edit Baseline Staffing
             </button>
             <button class="btn-primary" onclick="refreshAll()">Refresh Table</button>
           </div>
@@ -378,7 +431,10 @@
   <!-- ADD MACHINE MODAL -->
   <div id="add-modal" class="modal">
     <div class="modal-content">
-      <div class="section-title" style="margin-bottom: 14px;">Add New Production Line</div>
+      <div class="modal-header">
+        <div class="section-title">Add New Production Line</div>
+        <button type="button" class="close-btn" onclick="closeAddModal()">&times;</button>
+      </div>
       <form onsubmit="handleAddMachine(event)">
         <div class="form-group">
           <label>Line ID (e.g. L-13)</label>
@@ -412,33 +468,35 @@
           </select>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button type="submit" class="btn-primary" style="flex: 1;">Add Machine Line</button>
+          <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">Add Machine Line</button>
           <button type="button" class="btn-sm" onclick="closeAddModal()" style="flex: 1;">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- BASELINE MODAL -->
+  <!-- BASELINE STAFFING MODAL (النوافذ المنبثقة الأنيقة) -->
   <div id="baseline-modal" class="modal">
     <div class="modal-content">
-      <div class="section-title" style="margin-bottom: 14px;">Baseline Labor Staffing</div>
+      <div class="modal-header">
+        <div class="section-title">Baseline Labor Staffing</div>
+        <button type="button" class="close-btn" onclick="closeBaselineModal()">&times;</button>
+      </div>
       <form onsubmit="updateSettings(event)">
         <div class="form-group">
           <label>Company Fixed Workers</label>
-          <input type="number" id="comp-workers" required>
+          <input type="number" id="comp-workers" placeholder="Enter number" required>
         </div>
         <div class="form-group">
           <label>Current Agency Workers</label>
-          <input type="number" id="ext-workers" required>
+          <input type="number" id="ext-workers" placeholder="Enter number" required>
         </div>
         <div class="form-group">
           <label>Agency Worker Rate (SAR/Day)</label>
-          <input type="number" id="daily-rate" required>
+          <input type="number" id="daily-rate" placeholder="Enter rate" required>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button type="submit" class="btn-primary" style="flex: 1;">Save Staffing Baseline</button>
-          <button type="button" class="btn-sm" onclick="closeBaselineModal()" style="flex: 1;">Cancel</button>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Save Staffing Baseline</button>
         </div>
       </form>
     </div>
@@ -447,7 +505,10 @@
   <!-- EDIT MACHINE MODAL -->
   <div id="edit-modal" class="modal">
     <div class="modal-content">
-      <div class="section-title" style="margin-bottom: 16px;">Edit Machine Line Parameters</div>
+      <div class="modal-header">
+        <div class="section-title">Edit Machine Line Parameters</div>
+        <button type="button" class="close-btn" onclick="closeEditModal()">&times;</button>
+      </div>
       <form onsubmit="handleSaveEditMachine(event)">
         <input type="hidden" id="edit-original-id">
         <div class="form-group">
@@ -485,8 +546,8 @@
             <option value="Mixed (Company + Agency)">Mixed (Company + Agency)</option>
           </select>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 20px; position: sticky; bottom: 0; background: white; padding-top: 10px;">
-          <button type="submit" class="btn-primary" style="flex: 1;">Save Changes</button>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">Save Changes</button>
           <button type="button" class="btn-sm" onclick="closeEditModal()" style="flex: 1;">Cancel</button>
         </div>
       </form>
@@ -839,6 +900,12 @@
         globalData.currentExternal = data.currentExternal;
         globalData.dailyCostPerWorker = data.dailyCost;
 
+        // تحديث قيم الشريط العلوي
+        document.getElementById('top-company-workers').innerText = `${data.companyBaseline} Workers`;
+        document.getElementById('top-agency-workers').innerText = `${data.currentExternal} Workers`;
+        document.getElementById('top-agency-rate').innerText = `SAR ${data.dailyCost}/Day`;
+
+        // تحديث المودال
         document.getElementById('comp-workers').value = data.companyBaseline;
         document.getElementById('ext-workers').value = data.currentExternal;
         document.getElementById('daily-rate').value = data.dailyCost;
