@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PWP System - تسجيل الدخول</title>
+  <title>PWP System -  Log In</title>
   <style>
     :root {
       --bg-color: #f8fafc;
@@ -132,27 +132,27 @@
   <div class="login-card">
     <div class="header">
       <h2>PWP System</h2>
-      <p>تسجيل الدخول للوحة التحكم</p>
+      <p>Log in to the control panel</p>
     </div>
 
     <div id="alert-box" class="alert-msg"></div>
 
     <form onsubmit="handleLogin(event)">
       <div class="form-group">
-        <label>البريد الإلكتروني</label>
+        <label> Email</label>
         <input type="email" id="login-email" placeholder="example@domain.com" required dir="ltr">
       </div>
 
       <div class="form-group">
-        <label>كلمة المرور</label>
+        <label> Password</label>
         <input type="password" id="login-password" placeholder="••••••••" required dir="ltr">
       </div>
 
-      <button type="submit" class="btn-submit">دخول</button>
+      <button type="submit" class="btn-submit">Log In</button>
     </form>
 
     <div class="footer-text">
-      ليس لديك حساب؟ <a href="register">إنشاء حساب جديد</a>
+      Don't have an account? <a href="Register.html">Create a new account</a>
     </div>
   </div>
 
@@ -183,7 +183,7 @@
 
           // 2. إظهار رسالة النجاح
           alertBox.className = 'alert-msg alert-success';
-          alertBox.innerText = 'تم تسجيل الدخول بنجاح! جاري التوجيه...';
+          alertBox.innerText = 'Login successful! Redirecting...';
           alertBox.style.display = 'block';
 
           // 3. التوجيه المباشر والضروري للصفحة الرئيسية
@@ -192,12 +192,12 @@
           }, 800);
         } else {
           alertBox.className = 'alert-msg alert-danger';
-          alertBox.innerText = data.error || 'البيانات غير صحيحة';
+          alertBox.innerText = data.error || 'Invalid credentials';
           alertBox.style.display = 'block';
         }
       } catch (err) {
         alertBox.className = 'alert-msg alert-danger';
-        alertBox.innerText = 'تعذر الاتصال بالسيرفر';
+        alertBox.innerText = 'Failed to connect to the server';
         alertBox.style.display = 'block';
       }
     }

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWP System - Full Management Engine</title>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding: 16px; }
+    .container { max-width: 98%; margin: 0 auto; }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--border);
+    }
+    .title-group h1 { font-size: 24px; font-weight: 700; }
+    .title-group p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--card-bg); font-weight: 600; cursor: pointer; color: var(--text-muted);
+    }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--card-bg); padding: 18px; border-radius: 12px;
+      border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .kpi-card .label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+    .kpi-card .value { font-size: 22px; font-weight: 700; }
+    .kpi-card .subtext { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .section-card {
+      background: var(--card-bg); padding: 20px; border-radius: 12px;
+      border: 1px solid var(--border); margin-bottom: 20px; overflow-x: auto;
+    }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+    .section-title { font-size: 16px; font-weight: 700; }
+
+    .btn-primary {
+      background: var(--primary); color: white; border: none; padding: 10px 18px;
+      border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-danger {
+      background: var(--danger); color: white; border: none; padding: 6px 10px;
+      border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px;
+    }
+    .btn-sm {
+      padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: #f1f5f9; cursor: pointer; font-weight: 600; font-size: 12px;
+    }
+    .btn-outline-primary {
+      background: var(--card-bg); color: var(--primary); border: 1.5px solid var(--primary);
+      padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px;
+      display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+    }
+    .btn-outline-primary:hover {
+      background: var(--primary); color: #ffffff;
+    }
+    .btn-mode {
+      background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; padding: 6px 10px;
+      border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 12px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group select {
+      padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background-color: #fff;
+    }
+
+    .data-table { width: 100%; border-collapse: collapse; min-width: 850px; }
+    .data-table th, .data-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .data-table th { background-color: #f1f5f9; color: var(--text-muted); font-weight: 600; }
+
+    .tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .tag-active { background: #dcfce7; color: #15803d; }
+    .tag-stopped { background: #fee2e2; color: #991b1b; }
+
+    .action-box {
+      padding: 16px; border-radius: 8px; margin-top: 16px; font-weight: bold; font-size: 16px; text-align: center;
+    }
+    .action-request { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .action-release { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .action-maintain { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .days-input {
+      width: 65px; padding: 6px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-weight: bold;
+    }
+
+    /* MODERN MODAL DESIGN (UI/UX BEST PRACTICE) */
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
+      justify-content: center; align-items: center; padding: 16px;
+    }
+    .modal-content {
+      background-color: white; padding: 24px; border-radius: 16px; width: 420px; max-width: 95%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    .close-btn {
+      background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;
+    }
+
+    /* STAFFING BAR DESIGN */
+    .staffing-summary-bar {
+      display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .staff-card {
+      flex: 1; min-width: 200px; background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .staff-card-info .title { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .staff-card-info .num { font-size: 20px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+    .staff-card-icon { font-size: 22px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <h1>PWP System - Production & Labor Control Engine</h1>
+        <p>Full Line Management, Period Analytics & HR Dispatch</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="system-status" style="background: #dcfce7; color: #15803d; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">System Ready</div>
+        <button onclick="handleLogout()" class="btn-danger" style="padding: 8px 14px; font-size: 13px;"> Log Out 🚪</button>
+      </div>
+    </header>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('production')">1. Production Lines Setup</button>
+      <button class="tab-btn" onclick="switchTab('hr-dispatch')">2. HR Order & Dispatch (3 Dates)</button>
+      <button class="tab-btn" onclick="switchTab('quick-analytics')">3. Quick Period Analytics</button>
+      <button class="tab-btn" onclick="switchTab('reports')">4. Executive Financial Report</button>
+      <button class="tab-btn" onclick="switchTab('audit')">5. Audit History Log</button>
+    </div>
+
+    <!-- TAB 1: PRODUCTION LINES CONTROL -->
+    <div id="tab-production" class="tab-content active">
+
+      <!-- TOP STAFFING METRICS BAR -->
+      <div class="staffing-summary-bar">
+        <div class="staff-card" style="border-left: 4px solid var(--primary);">
+          <div class="staff-card-info">
+            <div class="title">Company Fixed Workers</div>
+            <div class="num" id="top-company-workers">-</div>
+          </div>
+          <div class="staff-card-icon">🏢</div>
+        </div>
+
+        <div class="staff-card" style="border-left: 4px solid var(--warning);">
+          <div class="staff-card-info">
+            <div class="title">Current Agency Workers</div>
+            <div class="num" id="top-agency-workers">-</div>
+          </div>
+          <div class="staff-card-icon">👥</div>
+        </div>
+
+        <div class="staff-card" style="border-left: 4px solid var(--success);">
+          <div class="staff-card-info">
+            <div class="title">Agency Daily Rate</div>
+            <div class="num" id="top-agency-rate">-</div>
+          </div>
+          <div class="staff-card-icon">💵</div>
+        </div>
+      </div>
+      
+      <!-- MACHINES TABLE CARD -->
+      <div class="section-card">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Factory Machine Lines</div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Full control: Edit line details, operating days, mode toggle, or remove line</p>
+          </div>
+          
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button type="button" class="btn-outline-primary" onclick="openAddModal()">
+              <span>+</span> Add New Line
+            </button>
+            <button type="button" class="btn-outline-primary" onclick="openBaselineModal()">
+              <span>⚙️</span> Edit Baseline Staffing
+            </button>
+            <button class="btn-primary" onclick="refreshAll()">Refresh Table</button>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Product Mode</th>
+              <th>Shifts</th>
+              <th>Daily Workers</th>
+              <th>Operating Days</th>
+              <th>Total Man-Days</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="production-table-body"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- TAB 2: HR DISPATCH ORDER -->
+    <div id="tab-hr-dispatch" class="tab-content">
+      <div class="section-card">
+        <div class="section-header">
+          <div>
+            <div class="section-title" style="font-size: 20px;">HR Official Dispatch Order & Date Setup</div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Set Request Date (Wednesday Default) and Period Start/End Dates</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div class="form-group">
+            <label>1. Order Request Date (Wednesday)</label>
+            <input type="date" id="hr-request-date" onchange="renderHRDispatch()">
+          </div>
+          <div class="form-group">
+            <label>2. Period Start Date</label>
+            <input type="date" id="hr-start-date" onchange="calculateHRPeriodDays()">
+          </div>
+          <div class="form-group">
+            <label>3. Period End Date</label>
+            <input type="date" id="hr-end-date" onchange="calculateHRPeriodDays()">
+          </div>
+          <div class="form-group">
+            <label>Total Selected Days</label>
+            <input type="text" id="hr-total-days" value="7 Days" readonly style="background: #e2e8f0; font-weight: bold; text-align: center;">
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="label">Total Period Man-Days Req</div>
+            <div class="value" id="hr-total-mandays">-</div>
+            <div class="subtext">Sum for active lines in period</div>
+          </div>
+          <div class="kpi-card">
+            <div class="label">Company Staff Capacity</div>
+            <div class="value" id="hr-company-mandays">-</div>
+            <div class="subtext">Fixed Workers x Period Days</div>
+          </div>
+          <div class="kpi-card">
+            <div class="label">Required Agency Daily Headcount</div>
+            <div class="value" id="hr-required-agency" style="color: var(--primary);">-</div>
+            <div class="subtext">Net External Need</div>
+          </div>
+          <div class="kpi-card">
+            <div class="label">Current Agency Onsite</div>
+            <div class="value" id="hr-current-agency">-</div>
+            <div class="subtext">Currently Registered Agency</div>
+          </div>
+        </div>
+
+        <div id="hr-official-order" class="action-box action-maintain">
+          Calculating Order Decision...
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: QUICK PERIOD ANALYTICS -->
+    <div id="tab-quick-analytics" class="tab-content">
+      <div class="section-card">
+        <div class="section-header">
+          <div>
+            <div class="section-title" style="font-size: 20px;">Quick Period Analytics & Date Filter</div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Filter by any custom date range to instantly view line headcount, workers, and period costs</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 180px; gap: 16px; margin-bottom: 24px;">
+          <div class="form-group">
+            <label>Filter Start Date</label>
+            <input type="date" id="qa-start-date" value="2026-08-12" onchange="renderQuickAnalytics()">
+          </div>
+          <div class="form-group">
+            <label>Filter End Date</label>
+            <input type="date" id="qa-end-date" value="2026-08-26" onchange="renderQuickAnalytics()">
+          </div>
+          <div class="form-group">
+            <label>Filtered Duration</label>
+            <input type="text" id="qa-total-days" value="15 Days" readonly style="background: #e2e8f0; font-weight: bold; text-align: center;">
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card" style="border-left: 4px solid var(--primary);">
+            <div class="label">Active Machines in Period</div>
+            <div class="value" id="qa-active-count">0</div>
+            <div class="subtext">Lines scheduled > 0 days</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--success);">
+            <div class="label">Total Manpower Req (Man-Days)</div>
+            <div class="value" id="qa-total-mandays">0</div>
+            <div class="subtext">Total labor days needed</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--warning);">
+            <div class="label">Total Agency Cost</div>
+            <div class="value" id="qa-agency-cost">SAR 0</div>
+            <div class="subtext">Estimated external labor budget</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--danger);">
+            <div class="label">Potential Waste Cost</div>
+            <div class="value" id="qa-waste-cost">SAR 0</div>
+            <div class="subtext">Cost of unused surplus agency</div>
+          </div>
+        </div>
+
+        <table class="data-table" style="margin-top: 20px;">
+          <thead>
+            <tr>
+              <th>Line ID</th>
+              <th>Machine Name</th>
+              <th>Status</th>
+              <th>Workers / Day</th>
+              <th>Operating Days Scheduled</th>
+              <th>Total Period Man-Days</th>
+              <th>Estimated Period Labor Cost</th>
+            </tr>
+          </thead>
+          <tbody id="qa-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: EXECUTIVE FINANCIAL REPORT -->
+    <div id="tab-reports" class="tab-content">
+      <div class="section-card">
+        <div class="section-header">
+          <div>
+            <div class="section-title" style="font-size: 20px;">Executive Financial Summary Report</div>
+            <p style="font-size: 13px; color: var(--text-muted);">Period Financial Cost Breakdown & Agency Staffing Savings</p>
+          </div>
+          <button class="btn-primary" onclick="window.print()">Print Report</button>
+        </div>
+
+        <div class="kpi-grid" style="margin-top: 16px;">
+          <div class="kpi-card" style="border-left: 4px solid var(--primary);">
+            <div class="label">Total Needed Agency Cost</div>
+            <div class="value" id="rep-period-cost">SAR 0</div>
+            <div class="subtext">Cost for net required agency labor</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--danger);">
+            <div class="label">Excess Overstaffing Waste</div>
+            <div class="value" id="rep-period-waste">SAR 0</div>
+            <div class="subtext">Direct financial loss if unmanaged</div>
+          </div>
+          <div class="kpi-card" style="border-left: 4px solid var(--success);">
+            <div class="label">Achievable Cost Savings</div>
+            <div class="value" id="rep-period-savings">SAR 0</div>
+            <div class="subtext">Savings upon releasing extra agency</div>
+          </div>
+        </div>
+
+        <table class="data-table" style="margin-top: 20px;">
+          <thead>
+            <tr>
+              <th>Line ID</th>
+              <th>Machine Name</th>
+              <th>Product Mode</th>
+              <th>Shifts</th>
+              <th>Daily Staff Req</th>
+              <th>Days Scheduled</th>
+              <th>Total Period Man-Days</th>
+              <th>Period Labor Cost (SAR)</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: AUDIT LOG -->
+    <div id="tab-audit" class="tab-content">
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title" style="font-size: 20px;">System Audit & Log History</div>
+          <button class="btn-primary" onclick="loadAuditLogs()">Refresh Log</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Target Line</th>
+              <th>Action Type</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ADD MACHINE MODAL -->
+  <div id="add-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="section-title">Add New Production Line</div>
+        <button type="button" class="close-btn" onclick="closeAddModal()">&times;</button>
+      </div>
+      <form onsubmit="handleAddMachine(event)">
+        <div class="form-group">
+          <label>Line ID (e.g. L-13)</label>
+          <input type="text" id="add-id" placeholder="L-13" required>
+        </div>
+        <div class="form-group">
+          <label>Machine Name / Specification</label>
+          <input type="text" id="add-name" placeholder="HDPE Pipe Line" required>
+        </div>
+        <div class="form-group">
+          <label>Product Mode</label>
+          <select id="add-mode">
+            <option value="Coiled Product">Coiled Product (3 Workers / Shift)</option>
+            <option value="Straight Pipe">Straight Pipe (2 Workers / Shift)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Shifts Count</label>
+          <input type="number" id="add-shifts" value="2" min="1" max="4" required>
+        </div>
+        <div class="form-group">
+          <label>Operating Days</label>
+          <input type="number" id="add-days" value="7" min="0" max="365" required>
+        </div>
+        <div class="form-group">
+          <label>Staff Type Assigned</label>
+          <select id="add-assigned">
+            <option value="Company Staff">Company Staff</option>
+            <option value="Agency Staff">Agency Staff</option>
+            <option value="Mixed (Company + Agency)">Mixed (Company + Agency)</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">Add Machine Line</button>
+          <button type="button" class="btn-sm" onclick="closeAddModal()" style="flex: 1;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BASELINE STAFFING MODAL (النوافذ المنبثقة الأنيقة) -->
+  <div id="baseline-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="section-title">Baseline Labor Staffing</div>
+        <button type="button" class="close-btn" onclick="closeBaselineModal()">&times;</button>
+      </div>
+      <form onsubmit="updateSettings(event)">
+        <div class="form-group">
+          <label>Company Fixed Workers</label>
+          <input type="number" id="comp-workers" placeholder="Enter number" required>
+        </div>
+        <div class="form-group">
+          <label>Current Agency Workers</label>
+          <input type="number" id="ext-workers" placeholder="Enter number" required>
+        </div>
+        <div class="form-group">
+          <label>Agency Worker Rate (SAR/Day)</label>
+          <input type="number" id="daily-rate" placeholder="Enter rate" required>
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Save Staffing Baseline</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT MACHINE MODAL -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="section-title">Edit Machine Line Parameters</div>
+        <button type="button" class="close-btn" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form onsubmit="handleSaveEditMachine(event)">
+        <input type="hidden" id="edit-original-id">
+        <div class="form-group">
+          <label>Line ID</label>
+          <input type="text" id="edit-id" required>
+        </div>
+        <div class="form-group">
+          <label>Machine Name</label>
+          <input type="text" id="edit-name" required>
+        </div>
+        <div class="form-group">
+          <label>Type / Spec</label>
+          <input type="text" id="edit-type" required>
+        </div>
+        <div class="form-group">
+          <label>Product Mode</label>
+          <select id="edit-mode">
+            <option value="Coiled Product">Coiled Product (3 Workers / Shift)</option>
+            <option value="Straight Pipe">Straight Pipe (2 Workers / Shift)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Shifts Count</label>
+          <input type="number" id="edit-shifts" min="1" max="4" required>
+        </div>
+        <div class="form-group">
+          <label>Operating Days</label>
+          <input type="number" id="edit-days" min="0" max="365" required>
+        </div>
+        <div class="form-group">
+          <label>Staff Assigned</label>
+          <select id="edit-assigned">
+            <option value="Company Staff">Company Staff</option>
+            <option value="Agency Staff">Agency Staff</option>
+            <option value="Mixed (Company + Agency)">Mixed (Company + Agency)</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">Save Changes</button>
+          <button type="button" class="btn-sm" onclick="closeEditModal()" style="flex: 1;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function checkAuth() {
+      const token = localStorage.getItem('pwp_token');
+      if (!token) {
+        window.location.href = '/login.html';
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('pwp_token');
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+
+    let globalData = { companyBaseline: 20, currentExternal: 35, dailyCostPerWorker: 150, machines: [] };
+
+    // Modal Helpers
+    function openAddModal() { document.getElementById('add-modal').style.display = 'flex'; }
+    function closeAddModal() { document.getElementById('add-modal').style.display = 'none'; }
+    function openBaselineModal() { document.getElementById('baseline-modal').style.display = 'flex'; }
+    function closeBaselineModal() { document.getElementById('baseline-modal').style.display = 'none'; }
+
+    function setDefaultDates() {
+      const today = new Date();
+      const dayOfWeek = today.getDay();
+      const distanceToWed = (3 - dayOfWeek + 7) % 7;
+      const nextWed = new Date(today);
+      nextWed.setDate(today.getDate() + distanceToWed);
+
+      const startDate = new Date(nextWed);
+      const endDate = new Date(nextWed);
+      endDate.setDate(startDate.getDate() + 6);
+
+      document.getElementById('hr-request-date').value = nextWed.toISOString().split('T')[0];
+      document.getElementById('hr-start-date').value = startDate.toISOString().split('T')[0];
+      document.getElementById('hr-end-date').value = endDate.toISOString().split('T')[0];
+      calculateHRPeriodDays();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      if (tab === 'production') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-production').classList.add('active');
+      } else if (tab === 'hr-dispatch') {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-hr-dispatch').classList.add('active');
+        renderHRDispatch();
+      } else if (tab === 'quick-analytics') {
+        document.querySelectorAll('.tab-btn')[2].classList.add('active');
+        document.getElementById('tab-quick-analytics').classList.add('active');
+        renderQuickAnalytics();
+      } else if (tab === 'reports') {
+        document.querySelectorAll('.tab-btn')[3].classList.add('active');
+        document.getElementById('tab-reports').classList.add('active');
+        renderReports();
+      } else if (tab === 'audit') {
+        document.querySelectorAll('.tab-btn')[4].classList.add('active');
+        document.getElementById('tab-audit').classList.add('active');
+        loadAuditLogs();
+      }
+    }
+
+    function calculateHRPeriodDays() {
+      const start = new Date(document.getElementById('hr-start-date').value);
+      const end = new Date(document.getElementById('hr-end-date').value);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById('hr-total-days').value = `${diffDays || 7} Days`;
+      renderHRDispatch();
+      return diffDays || 7;
+    }
+
+    async function handleAddMachine(event) {
+      event.preventDefault();
+      const body = {
+        id: document.getElementById('add-id').value,
+        name: document.getElementById('add-name').value,
+        type: document.getElementById('add-name').value,
+        productMode: document.getElementById('add-mode').value,
+        shiftsCount: document.getElementById('add-shifts').value,
+        operatingDays: document.getElementById('add-days').value,
+        assigned: document.getElementById('add-assigned').value
+      };
+
+      await fetch('/api/machines/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      document.getElementById('add-id').value = '';
+      document.getElementById('add-name').value = '';
+      closeAddModal();
+      loadMachines();
+    }
+
+    function openEditModal(id) {
+      const target = globalData.machines.find(m => m.id === id);
+      if (target) {
+        document.getElementById('edit-original-id').value = target.id;
+        document.getElementById('edit-id').value = target.id;
+        document.getElementById('edit-name').value = target.name;
+        document.getElementById('edit-type').value = target.type || target.name;
+        document.getElementById('edit-mode').value = target.productMode;
+        document.getElementById('edit-shifts').value = target.shiftsCount;
+        document.getElementById('edit-days').value = target.operatingDays;
+        document.getElementById('edit-assigned').value = target.assigned;
+        document.getElementById('edit-modal').style.display = 'flex';
+      }
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    async function handleSaveEditMachine(event) {
+      event.preventDefault();
+      const originalId = document.getElementById('edit-original-id').value;
+      const body = {
+        id: originalId,
+        newId: document.getElementById('edit-id').value,
+        name: document.getElementById('edit-name').value,
+        type: document.getElementById('edit-type').value,
+        productMode: document.getElementById('edit-mode').value,
+        shiftsCount: document.getElementById('edit-shifts').value,
+        operatingDays: document.getElementById('edit-days').value,
+        assigned: document.getElementById('edit-assigned').value
+      };
+
+      await fetch('/api/machines/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      closeEditModal();
+      loadMachines();
+    }
+
+    async function toggleModeQuick(id) {
+      await fetch('/api/machines/toggle-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      loadMachines();
+    }
+
+    async function deleteMachine(id) {
+      if (confirm(`Are you sure you want to delete line ${id}?`)) {
+        await fetch('/api/machines/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        loadMachines();
+      }
+    }
+
+    async function updateMachineDays(id, days) {
+      await fetch('/api/machines/update-days', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, days: Number(days) })
+      });
+      loadMachines();
+    }
+
+    async function toggleMachine(id) {
+      await fetch('/api/machines/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      loadMachines();
+    }
+
+    function renderProductionTable() {
+      const tbody = document.getElementById('production-table-body');
+      tbody.innerHTML = '';
+
+      globalData.machines.forEach(m => {
+        const isLineActive = m.status === 'Active' && m.operatingDays > 0;
+        const dailyWorkers = isLineActive ? m.required : 0;
+        const manDays = dailyWorkers * m.operatingDays;
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${m.id}</strong></td>
+            <td><strong>${m.name}</strong></td>
+            <td>
+              <button class="btn-mode" onclick="toggleModeQuick('${m.id}')" title="Click to quick toggle 2 vs 3 workers per shift">
+                ${m.productMode}
+              </button>
+            </td>
+            <td>${m.shiftsCount} Shifts</td>
+            <td><strong>${dailyWorkers}</strong> W/Day</td>
+            <td>
+              <input type="number" class="days-input" min="0" max="365" value="${m.operatingDays}" 
+                onchange="updateMachineDays('${m.id}', this.value)"> Days
+            </td>
+            <td><strong>${manDays}</strong> Man-Days</td>
+            <td><span class="tag ${isLineActive ? 'tag-active' : 'tag-stopped'}">${isLineActive ? 'Active' : 'Stopped'}</span></td>
+            <td>
+              <button class="btn-sm" onclick="openEditModal('${m.id}')">Edit ✏️</button>
+              <button class="btn-sm" onclick="toggleMachine('${m.id}')">Status 🔄</button>
+              <button class="btn-danger" onclick="deleteMachine('${m.id}')">Delete 🗑️</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    async function renderHRDispatch() {
+      const periodDays = calculateHRPeriodDays();
+      const totalManDaysReq = globalData.machines.reduce((sum, m) => {
+        const isLineActive = m.status === 'Active' && m.operatingDays > 0;
+        return sum + ((isLineActive ? m.required : 0) * m.operatingDays);
+      }, 0);
+
+      const companyCapacityManDays = globalData.companyBaseline * periodDays;
+      const netAgencyManDaysNeeded = Math.max(0, totalManDaysReq - companyCapacityManDays);
+      const netAgencyHeadcountNeeded = Math.ceil(netAgencyManDaysNeeded / periodDays);
+      const deltaAgency = netAgencyHeadcountNeeded - globalData.currentExternal;
+
+      document.getElementById('hr-total-mandays').innerText = `${totalManDaysReq} Man-Days`;
+      document.getElementById('hr-company-mandays').innerText = `${companyCapacityManDays} Man-Days`;
+      document.getElementById('hr-required-agency').innerText = `${netAgencyHeadcountNeeded} Workers / Day`;
+      document.getElementById('hr-current-agency').innerText = `${globalData.currentExternal} Workers / Day`;
+
+      const orderBox = document.getElementById('hr-official-order');
+      if (deltaAgency > 0) {
+        orderBox.className = 'action-box action-request';
+        orderBox.innerText = `OFFICIAL HR ORDER: REQUEST +${deltaAgency} AGENCY WORKERS FOR THIS PERIOD`;
+      } else if (deltaAgency < 0) {
+        const releaseCount = Math.abs(deltaAgency);
+        const weeklySavings = releaseCount * globalData.dailyCostPerWorker * periodDays;
+        orderBox.className = 'action-box action-release';
+        orderBox.innerText = `OFFICIAL HR ORDER: RELEASE ${releaseCount} AGENCY WORKERS FOR THIS PERIOD (SAVINGS: SAR ${weeklySavings.toLocaleString()})`;
+      } else {
+        orderBox.className = 'action-box action-maintain';
+        orderBox.innerText = 'OFFICIAL HR ORDER: MAINTAIN CURRENT AGENCY WORKFORCE';
+      }
+    }
+
+    function renderQuickAnalytics() {
+      const start = new Date(document.getElementById('qa-start-date').value);
+      const end = new Date(document.getElementById('qa-end-date').value);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById('qa-total-days').value = `${diffDays} Days`;
+
+      let activeCount = 0;
+      let totalManDaysReq = 0;
+
+      const tbody = document.getElementById('qa-table-body');
+      tbody.innerHTML = '';
+
+      globalData.machines.forEach(m => {
+        const isLineActive = m.status === 'Active' && m.operatingDays > 0;
+        if (isLineActive) activeCount++;
+
+        const dailyWorkers = isLineActive ? m.required : 0;
+        const lineManDays = dailyWorkers * Math.min(m.operatingDays, diffDays);
+        totalManDaysReq += lineManDays;
+        const lineCost = lineManDays * globalData.dailyCostPerWorker;
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${m.id}</strong></td>
+            <td><strong>${m.name}</strong></td>
+            <td><span class="tag ${isLineActive ? 'tag-active' : 'tag-stopped'}">${isLineActive ? 'Active' : 'Stopped'}</span></td>
+            <td>${dailyWorkers} Workers/Day</td>
+            <td>${m.operatingDays} Days</td>
+            <td><strong>${lineManDays}</strong> Man-Days</td>
+            <td><strong>SAR ${lineCost.toLocaleString()}</strong></td>
+          </tr>
+        `;
+      });
+
+      const companyCapacityManDays = globalData.companyBaseline * diffDays;
+      const netAgencyManDaysNeeded = Math.max(0, totalManDaysReq - companyCapacityManDays);
+      const actualAgencyCost = netAgencyManDaysNeeded * globalData.dailyCostPerWorker;
+      const currentAgencyCapacityManDays = globalData.currentExternal * diffDays;
+      const wasteManDays = Math.max(0, currentAgencyCapacityManDays - netAgencyManDaysNeeded);
+      const wasteCost = wasteManDays * globalData.dailyCostPerWorker;
+
+      document.getElementById('qa-active-count').innerText = activeCount;
+      document.getElementById('qa-total-mandays').innerText = `${totalManDaysReq} Man-Days`;
+      document.getElementById('qa-agency-cost').innerText = `SAR ${actualAgencyCost.toLocaleString()}`;
+      document.getElementById('qa-waste-cost').innerText = `SAR ${wasteCost.toLocaleString()}`;
+    }
+
+    async function renderReports() {
+      const periodDays = calculateHRPeriodDays();
+      const totalManDaysReq = globalData.machines.reduce((sum, m) => {
+        const isLineActive = m.status === 'Active' && m.operatingDays > 0;
+        return sum + ((isLineActive ? m.required : 0) * m.operatingDays);
+      }, 0);
+
+      const companyCapacityManDays = globalData.companyBaseline * periodDays;
+      const netAgencyManDaysNeeded = Math.max(0, totalManDaysReq - companyCapacityManDays);
+      const actualAgencyCost = netAgencyManDaysNeeded * globalData.dailyCostPerWorker;
+      
+      const currentAgencyCapacityManDays = globalData.currentExternal * periodDays;
+      const wasteManDays = Math.max(0, currentAgencyCapacityManDays - netAgencyManDaysNeeded);
+      const wasteCost = wasteManDays * globalData.dailyCostPerWorker;
+
+      document.getElementById('rep-period-cost').innerText = `SAR ${actualAgencyCost.toLocaleString()}`;
+      document.getElementById('rep-period-waste').innerText = `SAR ${wasteCost.toLocaleString()}`;
+      document.getElementById('rep-period-savings').innerText = `SAR ${wasteCost.toLocaleString()}`;
+
+      const tbody = document.getElementById('report-table-body');
+      tbody.innerHTML = '';
+      globalData.machines.forEach(m => {
+        const isLineActive = m.status === 'Active' && m.operatingDays > 0;
+        const dailyReq = isLineActive ? m.required : 0;
+        const totalManDays = dailyReq * m.operatingDays;
+        const cost = totalManDays * globalData.dailyCostPerWorker;
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${m.id}</strong></td>
+            <td><strong>${m.name}</strong></td>
+            <td>${m.productMode}</td>
+            <td>${m.shiftsCount} Shifts</td>
+            <td>${dailyReq} Workers/Day</td>
+            <td>${m.operatingDays} Days</td>
+            <td><strong>${totalManDays}</strong> Man-Days</td>
+            <td><strong>SAR ${cost.toLocaleString()}</strong></td>
+          </tr>
+        `;
+      });
+    }
+
+    async function loadKPIs() {
+      try {
+        const response = await fetch('/api/dashboard/kpis');
+        const data = await response.json();
+        globalData.companyBaseline = data.companyBaseline;
+        globalData.currentExternal = data.currentExternal;
+        globalData.dailyCostPerWorker = data.dailyCost;
+
+        // تحديث قيم الشريط العلوي
+        document.getElementById('top-company-workers').innerText = `${data.companyBaseline} Workers`;
+        document.getElementById('top-agency-workers').innerText = `${data.currentExternal} Workers`;
+        document.getElementById('top-agency-rate').innerText = `SAR ${data.dailyCost}/Day`;
+
+        // تحديث المودال
+        document.getElementById('comp-workers').value = data.companyBaseline;
+        document.getElementById('ext-workers').value = data.currentExternal;
+        document.getElementById('daily-rate').value = data.dailyCost;
+      } catch (err) {}
+    }
+
+    async function loadMachines() {
+      try {
+        const response = await fetch('/api/machines');
+        globalData.machines = await response.json();
+        renderProductionTable();
+        renderHRDispatch();
+        renderQuickAnalytics();
+        renderReports();
+      } catch (err) {}
+    }
+
+    async function loadAuditLogs() {
+      try {
+        const res = await fetch('/api/audit-logs');
+        const logs = await res.json();
+        const tbody = document.getElementById('audit-table-body');
+        tbody.innerHTML = '';
+        logs.forEach(l => {
+          tbody.innerHTML += `
+            <tr>
+              <td><span style="font-size:12px; color: var(--text-muted);">${new Date(l.timestamp).toLocaleString()}</span></td>
+              <td><strong>${l.line_id}</strong></td>
+              <td><strong>${l.action}</strong></td>
+              <td>${l.details}</td>
+            </tr>
+          `;
+        });
+      } catch (err) {}
+    }
+
+    async function updateSettings(event) {
+      event.preventDefault();
+      const companyBaseline = document.getElementById('comp-workers').value;
+      const currentExternal = document.getElementById('ext-workers').value;
+      const dailyCost = document.getElementById('daily-rate').value;
+
+      await fetch('/api/settings/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyBaseline, currentExternal, dailyCost })
+      });
+      closeBaselineModal();
+      refreshAll();
+    }
+
+    function refreshAll() {
+      loadKPIs();
+      loadMachines();
+    }
+
+    setDefaultDates();
+    refreshAll();
+  </script>
+</body>
+</html>

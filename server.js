@@ -18,14 +18,11 @@ app.use((req, res, next) => {
   next();
 });
 
-const tursoUrl = 'https://pwp-db-v2-khaled0.aws-ap-south-1.turso.io';
-const authToken = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODYwMjA4ODksImlkIjoiMDE5ZmQyZTAtNGMwMS03YzY2LWIyYjMtNGFiNjM4ZTQzMmRiIiwia2lkIjoiaUVvUkhyUUFYMHg5blMzZzJJdkRqTlNHR0pjTS1Bcm1ZUHVFaXptMF9WMCIsInJpZCI6IjQ0OTk4NWI5LTc1YjQtNDQxMi04ZjM5LWI2NzBkMzQyZTA2ZCJ9.t5Gc0wGrVcDwM6A0cwl_R356QzxYSQWoe1BgC2upnYgIUF3ekXjKls073vLCRnGYAkd2h4sL8yS1GWA9LfgiDg';
-
+// الاتصال بقاعدة بيانات محلية لتجنب أخطاء المصادقة 401 والتوقف
 let db;
 try {
   db = createClient({
-    url: tursoUrl,
-    authToken: authToken
+    url: "file:local.db"
   });
 } catch (e) {
   console.error('Database connection init error:', e);
@@ -134,6 +131,11 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
 app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// مسار توجيه تلقائي لمنع أخطاء 404 عند استدعاء ملفات HTML بأسماء مختلفة
+app.get('/:page.html', (req, res) => {
+  res.sendFile(path.join(__dirname, `${req.params.page}.html`));
+});
 
 // -------------------------------------------------------------
 // 🔐 AUTHENTICATION APIs

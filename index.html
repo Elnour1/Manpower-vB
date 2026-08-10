@@ -11,6 +11,7 @@
       --text-main: #0f172a;
       --text-muted: #64748b;
       --primary: #2563eb;
+      --primary-hover: #1d4ed8;
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
@@ -27,6 +28,27 @@
     }
     .title-group h1 { font-size: 24px; font-weight: 700; }
     .title-group p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    /* PLANNER LINK BUTTON UI/UX */
+    .btn-planner-link {
+      background-color: var(--primary);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      border: 1px solid var(--primary-hover);
+      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
+    }
+    .btn-planner-link:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
 
     .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab-btn {
@@ -108,7 +130,6 @@
       width: 65px; padding: 6px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-weight: bold;
     }
 
-    /* MODERN MODAL DESIGN (UI/UX BEST PRACTICE) */
     .modal {
       display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
       background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
@@ -130,7 +151,6 @@
       background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;
     }
 
-    /* STAFFING BAR DESIGN */
     .staffing-summary-bar {
       display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
     }
@@ -153,6 +173,10 @@
         <p>Full Line Management, Period Analytics & HR Dispatch</p>
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
+        <!-- DIRECT LINK TO WORKFORCE CAPACITY PLANNER -->
+        <a href="planner.html" target="_blank" class="btn-planner-link">
+          📊 Workforce Capacity Planner
+        </a>
         <div id="system-status" style="background: #dcfce7; color: #15803d; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">System Ready</div>
         <button onclick="handleLogout()" class="btn-danger" style="padding: 8px 14px; font-size: 13px;"> Log Out 🚪</button>
       </div>
@@ -475,7 +499,7 @@
     </div>
   </div>
 
-  <!-- BASELINE STAFFING MODAL (النوافذ المنبثقة الأنيقة) -->
+  <!-- BASELINE STAFFING MODAL -->
   <div id="baseline-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -571,7 +595,6 @@
 
     let globalData = { companyBaseline: 20, currentExternal: 35, dailyCostPerWorker: 150, machines: [] };
 
-    // Modal Helpers
     function openAddModal() { document.getElementById('add-modal').style.display = 'flex'; }
     function closeAddModal() { document.getElementById('add-modal').style.display = 'none'; }
     function openBaselineModal() { document.getElementById('baseline-modal').style.display = 'flex'; }
@@ -900,12 +923,10 @@
         globalData.currentExternal = data.currentExternal;
         globalData.dailyCostPerWorker = data.dailyCost;
 
-        // تحديث قيم الشريط العلوي
         document.getElementById('top-company-workers').innerText = `${data.companyBaseline} Workers`;
         document.getElementById('top-agency-workers').innerText = `${data.currentExternal} Workers`;
         document.getElementById('top-agency-rate').innerText = `SAR ${data.dailyCost}/Day`;
 
-        // تحديث المودال
         document.getElementById('comp-workers').value = data.companyBaseline;
         document.getElementById('ext-workers').value = data.currentExternal;
         document.getElementById('daily-rate').value = data.dailyCost;

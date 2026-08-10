@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workforce Demand Capacity Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn {
+      padding: 12px 24px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .view { display: none; background: var(--surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .view.active { display: block; }
+
+    h2 { margin-bottom: 16px; font-size: 1.4rem; color: #1e293b; }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    /* Grid layout with flex-end alignment for strict baseline button alignment */
+    .grid-5 { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
+      gap: 15px; 
+      align-items: flex-end; 
+      margin-bottom: 20px;
+    }
+
+    .form-group { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+      margin-bottom: 0; 
+    }
+    
+    label { display: block; font-weight: 600; font-size: 0.85rem; color: var(--text); }
+    
+    select, input {
+      width: 100%;
+      height: 42px; /* Fixed standard height for alignment */
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; font-weight: 700; color: #475569; }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: inline-block;
+    }
+    .badge-add { background: #dcfce7; color: var(--success); border: 1px solid #86efac; }
+    .badge-remove { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
+    .badge-ok { background: #f1f5f9; color: #64748b; border: 1px solid var(--border); }
+
+    .btn {
+      height: 42px; /* Matching input height */
+      background: var(--primary);
+      color: white;
+      padding: 0 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn:hover { background: var(--primary-hover); }
+
+    .btn-delete {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Navigation Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('production', this)">🏭 Production Manager Screen</button>
+    <button class="tab-btn" onclick="switchTab('hr', this)">👥 HR Manager Screen</button>
+  </div>
+
+  <!-- 1. PRODUCTION VIEW -->
+  <div id="production" class="view active">
+    <h2>Weekly Machine Scheduling and Operation</h2>
+    <div class="header-bar">
+      <div><strong>Week Period:</strong> 15/08/2026 - 21/08/2026</div>
+      <div><strong>Fixed Company Capacity / Shift:</strong> <span style="color:var(--primary); font-weight:bold;">10 Workers</span></div>
+    </div>
+
+    <!-- Production Entry Form -->
+    <form id="prodForm" onsubmit="addProductionRow(event)">
+      <div class="grid-5">
+        <div class="form-group">
+          <label>Select Day</label>
+          <select id="daySelect" required>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Shift Timing</label>
+          <select id="shiftTimingSelect" required>
+            <option value="Shift 1 (Morning - 12 Hrs)">Shift 1 (Morning - 12 Hrs)</option>
+            <option value="Shift 2 (Evening - 12 Hrs)">Shift 2 (Evening - 12 Hrs)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Product Type & Rate</label>
+          <select id="productSelect" required>
+            <option value="2">1 Liter Bottle (2 Workers / Machine)</option>
+            <option value="3">5 Liter Bottle (3 Workers / Machine)</option>
+            <option value="4">20 Liter Barrel (4 Workers / Machine)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Active Machines</label>
+          <input type="number" id="machineCount" min="1" max="20" value="1" required>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="btn" style="width:100%;">Add Schedule</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Production Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>Scheduled Day & Shift</th>
+          <th>Standard Workers/Machine</th>
+          <th>Active Machines</th>
+          <th>Total Required Shift Workforce</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="prodTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 2. HR VIEW (Receives Live Updates) -->
+  <div id="hr" class="view">
+    <h2>Weekly Workforce Decision Matrix (HR Live View)</h2>
+    <div class="header-bar">
+      <div><strong>Fixed Company Capacity:</strong> 10 Workers/Shift</div>
+      <div><strong>Current Outsourced Agency Onsite:</strong> 12 Workers/Shift</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Day & Shift</th>
+          <th>Total Required (Shift Sum)</th>
+          <th>Fixed Company Staff</th>
+          <th>Current Agency Onsite</th>
+          <th>Net Agency Needed</th>
+          <th>HR Dispatch Decision</th>
+        </tr>
+      </thead>
+      <tbody id="hrTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Global System Constants
+  const FIXED_LABOR = 10;
+  const CURRENT_TEMPORARY_LABOR = 12;
+
+  // Shared Data Array
+  let productionData = [
+    { id: 1, shift: 'Saturday - Shift 1 (Morning - 12 Hrs)', ratio: 2, machines: 3, total: 6 },
+    { id: 2, shift: 'Saturday - Shift 1 (Morning - 12 Hrs)', ratio: 3, machines: 4, total: 12 },
+    { id: 3, shift: 'Saturday - Shift 2 (Evening - 12 Hrs)', ratio: 2, machines: 2, total: 4 },
+    { id: 4, shift: 'Sunday - Shift 1 (Morning - 12 Hrs)', ratio: 3, machines: 3, total: 9 }
+  ];
+
+  // Tab Switcher
+  function switchTab(tabId, btnElement) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+
+    btnElement.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+
+    if (tabId === 'hr') {
+      renderHRView();
+    }
+  }
+
+  // Render Production Manager Table
+  function renderProductionView() {
+    const tbody = document.getElementById('prodTableBody');
+    tbody.innerHTML = '';
+
+    productionData.forEach((item) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${item.shift}</strong></td>
+        <td>${item.ratio} Workers</td>
+        <td>${item.machines} Machines</td>
+        <td><strong>${item.total} Workers</strong></td>
+        <td><button class="btn-delete" onclick="deleteSchedule(${item.id})">Delete 🗑️</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Automatically sync HR view
+    renderHRView();
+  }
+
+  // Add Production Schedule
+  function addProductionRow(e) {
+    e.preventDefault();
+    const day = document.getElementById('daySelect').value;
+    const shiftTiming = document.getElementById('shiftTimingSelect').value;
+    const fullShiftName = `${day} - ${shiftTiming}`;
+    
+    const ratio = parseInt(document.getElementById('productSelect').value);
+    const machines = parseInt(document.getElementById('machineCount').value);
+    const total = ratio * machines;
+
+    productionData.push({ id: Date.now(), shift: fullShiftName, ratio, machines, total });
+    renderProductionView();
+  }
+
+  // Delete Schedule Row
+  function deleteSchedule(id) {
+    productionData = productionData.filter(item => item.id !== id);
+    renderProductionView();
+  }
+
+  // Render HR Decision Matrix (Aggregates shift data in real-time)
+  function renderHRView() {
+    const tbody = document.getElementById('hrTableBody');
+    tbody.innerHTML = '';
+
+    // Step 1: Group and sum required labor per Shift
+    const shiftTotals = {};
+    productionData.forEach(item => {
+      shiftTotals[item.shift] = (shiftTotals[item.shift] || 0) + item.total;
+    });
+
+    // Step 2: Calculate HR actions for each shift
+    for (const [shift, requiredLabor] of Object.entries(shiftTotals)) {
+      // Calculate Agency Need = (Total Required - Fixed Company Workers)
+      const requiredAgency = Math.max(0, requiredLabor - FIXED_LABOR);
+      
+      // Calculate Difference = Required Agency - Current Agency Onsite
+      const diff = requiredAgency - CURRENT_TEMPORARY_LABOR;
+
+      let badgeClass = 'badge-ok';
+      let actionText = '⚪ No Change (Matches Current Count)';
+
+      if (diff > 0) {
+        badgeClass = 'badge-add';
+        actionText = `🟢 REQUEST +${diff} WORKERS (Deficit Detected)`;
+      } else if (diff < 0) {
+        badgeClass = 'badge-remove';
+        actionText = `🔴 RETURN ${Math.abs(diff)} WORKERS (Surplus Detected)`;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${shift}</strong></td>
+        <td><strong>${requiredLabor} Workers</strong></td>
+        <td>${FIXED_LABOR}</td>
+        <td>${CURRENT_TEMPORARY_LABOR}</td>
+        <td><strong>${requiredAgency} Workers</strong></td>
+        <td><span class="badge ${badgeClass}">${actionText}</span></td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // Initial Load
+  renderProductionView();
+</script>
+
+</body>
+</html>
